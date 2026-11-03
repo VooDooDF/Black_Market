@@ -40,7 +40,7 @@ namespace Black_Market
             }
 
             // Проверка на свободное место в инвентаре
-            if (HasSpace(productCount))
+            if (!HasSpace(productCount))
             {
                 throw new InvalidOperationException("Отсутствует место в инвентаре.");
             }
@@ -105,9 +105,9 @@ namespace Black_Market
         }
 
         // Метод для получения списка продуктов в инвентаре
-        public List<Product?> GetProductsOnInventory()
+        public List<Product> GetProductsOnInventory()
         {
-            return QuantityOnPlayer.Keys.Select(id => catalog.FindProductById(id)).Where(p => p != null).ToList();
+            return QuantityOnPlayer.Keys.Select(id => catalog.FindProductById(id)).OfType<Product>().ToList();
         }
 
         // Метод для увеличения вместимости инвентаря

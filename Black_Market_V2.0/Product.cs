@@ -10,17 +10,27 @@ namespace Black_Market
     {
         public Guid Id { get; } = Guid.NewGuid();
         public string Name { get; }
-        public decimal Price { get; }
+        public decimal Price { get; private set; }
+        public const decimal MinPrice = 49.99m;
 
         // Конструктор класса Product
         public Product(string name, decimal price)
         {
-            if (price <= 0)
+            if (price < MinPrice)
             {
-                throw new Exception("Цена не может быть отрицательной или равна нулю!");
+                throw new ArgumentOutOfRangeException(nameof(price), $"Цена не может быть меньше {MinPrice}!");
             }
             Name = name;
             Price = price;
+        }
+
+        public void ChangePrice(decimal newPrice)
+        {
+            if (newPrice < MinPrice)
+            {
+                throw new ArgumentOutOfRangeException(nameof(newPrice), $"Цена не может быть меньше {MinPrice}!");
+            }
+            Price = newPrice;
         }
     }
 }

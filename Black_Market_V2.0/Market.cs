@@ -136,9 +136,9 @@ namespace Black_Market
             }
 
             // Успешная покупка
-            player.SubtractMoney(totalPrice);
-            RemoveProduct(productId, quantity);
             player.Inventory.AddProduct(productId, quantity);
+            RemoveProduct(productId, quantity);
+            player.SubtractMoney(totalPrice);
 
             return "Покупка продукта";
         }
@@ -165,17 +165,43 @@ namespace Black_Market
                 return "Недостаточно товара в инвентаре.";
             }
 
-            if (!player.Inventory.HasSpace(quantity))
-            {
-                return "Недостаточно места в инвентаре.";
-            }
-
             // Успешная продажа
-            player.AddMoney(totalPrice);
-            AddProduct(productId, quantity);
             player.Inventory.RemoveProduct(productId, quantity);
-
+            AddProduct(productId, quantity);
+            player.AddMoney(totalPrice);
+            
             return "Продажа продукта";
+        }
+
+        public void ChangePrices()
+        {
+            // Случайное изменение цены от -20% до +20%
+            foreach (var product in catalog.Products)
+            {
+                int changePercentage = random.Next(-20, 21);
+                decimal newPrice = Math.Round(product.Price * (1 + changePercentage / 100m), 2);
+                newPrice = Math.Max(Product.MinPrice, newPrice);
+                product.ChangePrice(newPrice);
+            }
+        }
+
+        // Метод для изменения количества продуктов на рынке
+        public void ChangeQuantities()
+        {
+            foreach (var product in catalog.Products)
+            {
+                int change = random.Next(-2, 3);
+                int quantity = GetProductQuantity(product.Id);
+                int newQuantity = Math.Max(0, quantity + change);
+                if (newQuantity > 0)
+                {
+                    QuantityOnMarket[product.Id] = newQuantity;
+                }
+                else
+                {
+                    QuantityOnMarket.Remove(product.Id);
+                }
+            }
         }
     }
 }

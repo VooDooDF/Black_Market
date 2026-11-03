@@ -127,11 +127,16 @@ namespace Black_Market
             int quantity;
 
             Console.WriteLine("Выберите товар для продажи:");
-            var productsOnMarket = market.GetProductsOnMarket(catalog);
-            for (int i = 0; i < productsOnMarket.Count; i++)
+            var productsOnInventory = player.Inventory.GetProductsOnInventory();
+            if (productsOnInventory.Count == 0)
             {
-                var product = productsOnMarket[i];
-                Console.WriteLine($"{i + 1}. {product.Name} - {product.Price}$ - {market.GetProductQuantity(product.Id)} шт.");
+                Console.WriteLine("Ваш инвентарь пуст.");
+                return;
+            }
+            for (int i = 0; i < productsOnInventory.Count; i++)
+            {
+                var product = productsOnInventory[i];
+                Console.WriteLine($"{i + 1}. {product.Name} - {product.Price}$ - {player.Inventory.GetQuantity(product.Id)} шт.");
             }
 
             Console.Write("Введите номер товара: ");
@@ -142,6 +147,12 @@ namespace Black_Market
             }
             productIndex -= 1;
 
+            if (productIndex < 0 || productIndex >= productsOnInventory.Count)
+            {
+                Console.WriteLine("Неверный номер товара.");
+                return;
+            }
+
             Console.Write("Введите количество для продажи: ");
             if (!int.TryParse(Console.ReadLine(), out quantity))
             {
@@ -149,7 +160,7 @@ namespace Black_Market
                 return;
             }
 
-            Guid productId = productsOnMarket[productIndex].Id;
+            Guid productId = productsOnInventory[productIndex].Id;
 
             Console.WriteLine(market.TrySell(player, productId, quantity));
         }
@@ -159,9 +170,10 @@ namespace Black_Market
             Console.WriteLine($"Баланс: {player.Money}$");
             Console.WriteLine($"Занимаемый объем: {player.Inventory.CurrentCount()}/{player.Inventory.Capacity}");
             Console.WriteLine("Ваш инвентарь:");
-            for (int i = 0; i < player.Inventory.GetProductsOnInventory().Count; i++)
+            var products = player.Inventory.GetProductsOnInventory();
+            for (int i = 0; i < products.Count; i++)
             {
-                var product = player.Inventory.GetProductsOnInventory()[i];
+                var product = products[i];
                 if (player.Inventory.GetQuantity(product.Id) > 0)
                 {
                     Console.WriteLine($"{i + 1}. {product.Name} - {product.Price}$ - {player.Inventory.GetQuantity(product.Id)} шт.");
@@ -178,8 +190,13 @@ namespace Black_Market
             }
 
             currentDay++;
-
-            player.Inventory.IncreaseCapacity();
+            if (currentDay% 2 == 0)
+            {
+                player.Inventory.IncreaseCapacity();
+            }
+            
+            market.ChangePrices();
+            market.ChangeQuantities();
             //RandomEvent();
 
             Console.WriteLine($"Наступил день {currentDay}");
@@ -190,18 +207,24 @@ namespace Black_Market
 
         static public void EndGame()
         {
-            int balance = (int)player.Money;
-            var productsOnMarket = market.GetProductsOnMarket(catalog);
-            for (int i = 0; i < productsOnMarket.Count; i++)
+            decimal balance = player.Money;
+            var productsOnInventory = player.Inventory.GetProductsOnInventory();
+            for (int i = 0; i < productsOnInventory.Count; i++)
             {
-                var product = productsOnMarket[i];
-                balance += (int)(product.Price * market.GetProductQuantity(product.Id));
-                market.RemoveProduct(product.Id, market.GetProductQuantity(product.Id));
+                var product = productsOnInventory[i];
+                balance += (product.Price * player.Inventory.GetQuantity(product.Id));
             }
 
-            if (balance >= 2000)
+            if (balance == 2000)
             {
-                Console.WriteLine("Поздравляем! Вы достигли цели и заработали больше 2000$.");
+                Console.WriteLine("Поздравляем! Вы достигли цели и 2000$.");
+                Console.WriteLine($"Ваш итоговый баланс: {balance}$");
+                return;
+            }
+
+            if (balance > 2000)
+            {
+                Console.WriteLine("Игра окончена! Вы достигли цели и заработали больше 2000$.");
                 Console.WriteLine($"Ваш итоговый баланс: {balance}$");
                 return;
             }
