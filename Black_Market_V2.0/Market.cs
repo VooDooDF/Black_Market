@@ -11,16 +11,16 @@ namespace Black_Market
     {
         Random random = new Random();
         Dictionary<Guid, int> QuantityOnMarket { get; }
-        private readonly ProductCatalog catalog;
+        private readonly ProductCatalog _catalog;
 
         // Конструктор класса Market
         public Market(ProductCatalog catalog)
         {
-            this.catalog = catalog;
+            _catalog = catalog;
             QuantityOnMarket = new Dictionary<Guid, int>();
 
             // Инициализация продуктов на рынке с рандомным количеством
-            foreach (var product in catalog.Products)
+            foreach (var product in _catalog.Products)
             {
                 int initialQuantity = random.Next(1, 10);
                 QuantityOnMarket[product.Id] = initialQuantity;
@@ -28,10 +28,10 @@ namespace Black_Market
         }
 
         // Метод для получения списка продуктов на рынке
-        public List<Product> GetProductsOnMarket(ProductCatalog catalog)
+        public List<Product> GetProductsOnMarket()
         {
             List<Product> productsOnMarket = new List<Product>();
-            foreach (var product in catalog.Products)
+            foreach (var product in _catalog.Products)
             {
                 if (QuantityOnMarket.ContainsKey(product.Id))
                 {
@@ -99,7 +99,7 @@ namespace Black_Market
         // Покупка продукта игроком
         public string TryBuy(Player player, Guid productId, int quantity)
         {
-            Product? product = catalog.FindProductById(productId);
+            Product? product = _catalog.FindProductById(productId);
 
             if (quantity <= 0)
             {
@@ -146,7 +146,7 @@ namespace Black_Market
         // Продажа продукта игроком
         public string TrySell(Player player, Guid productId, int quantity)
         {
-            Product? product = catalog.FindProductById(productId);
+            Product? product = _catalog.FindProductById(productId);
 
             if (quantity <= 0)
             {
@@ -173,10 +173,11 @@ namespace Black_Market
             return "Продажа продукта";
         }
 
+        // Изменение цены с двумя перегрузками
         public void ChangePrices()
         {
             // Случайное изменение цены от -20% до +20%
-            foreach (var product in catalog.Products)
+            foreach (var product in _catalog.Products)
             {
                 int changePercentage = random.Next(-20, 21);
                 decimal newPrice = Math.Round(product.Price * (1 + changePercentage / 100m), 2);
@@ -185,10 +186,19 @@ namespace Black_Market
             }
         }
 
+        // Изменение цены определённого продукта на определённый процент
+        public void ChangePrices(Guid productId, decimal percent)
+        {
+            Product? product = _catalog.FindProductById(productId);
+            decimal newPrice = Math.Round(product.Price * percent, 2);
+            newPrice = Math.Max(Product.MinPrice, newPrice);
+            product.ChangePrice(newPrice);
+        }
+
         // Метод для изменения количества продуктов на рынке
         public void ChangeQuantities()
         {
-            foreach (var product in catalog.Products)
+            foreach (var product in _catalog.Products)
             {
                 int change = random.Next(-2, 3);
                 int quantity = GetProductQuantity(product.Id);

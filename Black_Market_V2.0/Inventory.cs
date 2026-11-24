@@ -9,12 +9,12 @@ namespace Black_Market
     {
         public int Capacity { get; private set; }
         Dictionary<Guid, int> QuantityOnPlayer { get; }
-        private readonly ProductCatalog catalog;
+        private readonly ProductCatalog _catalog;
 
         // Конструктор класса Inventory
-        public Inventory(ProductCatalog productCatalog)
+        public Inventory(ProductCatalog catalog)
         {
-            catalog = productCatalog;
+            _catalog = catalog;
             Capacity = 10;
             QuantityOnPlayer = new Dictionary<Guid, int>();
         }
@@ -107,7 +107,7 @@ namespace Black_Market
         // Метод для получения списка продуктов в инвентаре
         public List<Product> GetProductsOnInventory()
         {
-            return QuantityOnPlayer.Keys.Select(id => catalog.FindProductById(id)).OfType<Product>().ToList();
+            return QuantityOnPlayer.Keys.Select(id => _catalog.FindProductById(id)).OfType<Product>().ToList();
         }
 
         // Метод для увеличения вместимости инвентаря

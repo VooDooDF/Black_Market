@@ -11,12 +11,12 @@ namespace Black_Market
         public string Name { get; private set; }
         public decimal Money { get; private set; }
         public Inventory Inventory { get; }
-        private readonly ProductCatalog catalog;
+        private readonly ProductCatalog _catalog;
 
         // Конструктор класса Player
-        public Player(string name, decimal money, ProductCatalog productCatalog)
+        public Player(string name, decimal money, ProductCatalog catalog)
         {
-            catalog = productCatalog;
+            _catalog = catalog;
             if (money < 0)
             {
                 throw new ArgumentException("Начальная сумма денег не может быть отрицательной.");
@@ -29,7 +29,7 @@ namespace Black_Market
 
             Name = name;
             Money = money;
-            Inventory = new Inventory(catalog);
+            Inventory = new Inventory(_catalog);
         }
 
         // Метод для добавления денег игроку
@@ -59,6 +59,11 @@ namespace Black_Market
 
             Money -= amount;
             return Money;
-        } 
+        }
+
+        public void GetProduct(Product product)
+        {
+
+        }
     }
 }

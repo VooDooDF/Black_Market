@@ -10,9 +10,9 @@ namespace Black_Market
     internal class Game
     {
         static ProductCatalog catalog = new ProductCatalog();
-        static Random random = new Random();
         static Player player = new Player("Player", 1000, catalog);
         static Market market = new Market(catalog);
+        static Event eventMarket = new Event();
 
         static int currentDay = 1;
         static int maxDays = 10;
@@ -25,9 +25,9 @@ namespace Black_Market
             Console.WriteLine($"Инвентарь: {player.Inventory.CurrentCount()}/{player.Inventory.Capacity}");
             Console.WriteLine();
             Console.WriteLine("====РЫНОК====");
-            for (int i = 0; i < market.GetProductsOnMarket(catalog).Count; i++)
+            for (int i = 0; i < market.GetProductsOnMarket().Count; i++)
             {
-                var product = market.GetProductsOnMarket(catalog)[i];
+                var product = market.GetProductsOnMarket()[i];
                 Console.WriteLine($"{i + 1}. {product.Name} - {product.Price}$ - {market.GetProductQuantity(product.Id)} шт.");
             }
         }
@@ -88,7 +88,7 @@ namespace Black_Market
             int quantity;
 
             Console.WriteLine("Выберите товар для покупки:");
-            var productsOnMarket = market.GetProductsOnMarket(catalog);
+            var productsOnMarket = market.GetProductsOnMarket();
             for (int i = 0; i < productsOnMarket.Count; i++)
             {
                 var product = productsOnMarket[i];
@@ -197,13 +197,11 @@ namespace Black_Market
             
             market.ChangePrices();
             market.ChangeQuantities();
-            //RandomEvent();
+            eventMarket.RandomEvent(market, player);
 
             Console.WriteLine($"Наступил день {currentDay}");
             return false;
         }
-
-        
 
         static public void EndGame()
         {
